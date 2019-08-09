@@ -1,0 +1,248 @@
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+suicio = pd.read_csv('suicidio.csv')
+
+suicio.info()
+
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 27820 entries, 0 to 27819
+Data columns (total 12 columns):
+country               27820 non-null object
+year                  27820 non-null int64
+sex                   27820 non-null object
+age                   27820 non-null object
+suicides_no           27820 non-null int64
+population            27820 non-null int64
+suicides/100k pop     27820 non-null float64
+country-year          27820 non-null object
+HDI for year          8364 non-null float64
+ gdp_for_year ($)     27820 non-null object
+gdp_per_capita ($)    27820 non-null int64
+generation            27820 non-null object
+dtypes: float64(2), int64(4), object(6)
+memory usage: 2.5+ MB
+
+#suicidio = pd.read_csv('suicidio.csv')
+#brasil = suicidio.where(suicidio.country == 'Brazil')   # CRIAR UMA BUSCA ESPECIFICA
+#print(brasil.sample(10))
+
+# VOU EXCLUIR ALGUMAS COLUNAS. COOMO POR EXEMPLO HDI_FOR_YEAR e COUTRY_YEAR 
+# é uma duplicação. Vou excluir também GPD_FOR_YEAR, GPD__PER_CAPITA que não
+# são relevante nesse caso.
+
+# Removendo colunas desnecessárias
+suicidio = suicidio.drop('country-year', axis=1)
+
+# imprimindo as primeira linhas do dataframe
+print(suicidio.shape)
+suicidio.info()
+print(suicidio.head())
+
+(27820, 11)
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 27820 entries, 0 to 27819
+Data columns (total 11 columns):
+country               27820 non-null object
+year                  27820 non-null int64
+sex                   27820 non-null object
+age                   27820 non-null object
+suicides_no           27820 non-null int64
+population            27820 non-null int64
+suicides/100k pop     27820 non-null float64
+HDI for year          8364 non-null float64
+ gdp_for_year ($)     27820 non-null object
+gdp_per_capita ($)    27820 non-null int64
+generation            27820 non-null object
+dtypes: float64(2), int64(4), object(5)
+memory usage: 2.3+ MB
+   country  year     sex          age  suicides_no  population  \
+0  Albania  1987    male  15-24 years           21      312900   
+1  Albania  1987    male  35-54 years           16      308000   
+2  Albania  1987  female  15-24 years           14      289700   
+3  Albania  1987    male    75+ years            1       21800   
+4  Albania  1987    male  25-34 years            9      274300   
+
+   suicides/100k pop  HDI for year  gdp_for_year ($)   gdp_per_capita ($)  \
+0               6.71           NaN      2,156,624,900                 796   
+1               5.19           NaN      2,156,624,900                 796   
+2               4.83           NaN      2,156,624,900                 796   
+3               4.59           NaN      2,156,624,900                 796   
+4               3.28           NaN      2,156,624,900                 796   
+
+        generation  
+0     Generation X  
+1           Silent  
+2     Generation X  
+3  G.I. Generation  
+4          Boomers  
+
+suicidio = suicidio.drop('HDI for year', axis=1)
+
+#suicidio = suicidio.drop('gdp_for_year ($)', axis=1)
+suicidio = suicidio.drop('gdp_per_capita ($)', axis=1)
+
+# imprimindo as primeira linhas do dataframe
+
+print(suicidio.shape)
+suicidio.info()
+print(suicidio.head())
+
+(27820, 9)
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 27820 entries, 0 to 27819
+Data columns (total 9 columns):
+country               27820 non-null object
+year                  27820 non-null int64
+sex                   27820 non-null object
+age                   27820 non-null object
+suicides_no           27820 non-null int64
+population            27820 non-null int64
+suicides/100k pop     27820 non-null float64
+ gdp_for_year ($)     27820 non-null object
+generation            27820 non-null object
+dtypes: float64(1), int64(3), object(5)
+memory usage: 1.9+ MB
+   country  year     sex          age  suicides_no  population  \
+0  Albania  1987    male  15-24 years           21      312900   
+1  Albania  1987    male  35-54 years           16      308000   
+2  Albania  1987  female  15-24 years           14      289700   
+3  Albania  1987    male    75+ years            1       21800   
+4  Albania  1987    male  25-34 years            9      274300   
+
+   suicides/100k pop  gdp_for_year ($)        generation  
+0               6.71      2,156,624,900     Generation X  
+1               5.19      2,156,624,900           Silent  
+2               4.83      2,156,624,900     Generation X  
+3               4.59      2,156,624,900  G.I. Generation  
+4               3.28      2,156,624,900          Boomers  
+
+#CONSTRUÇÃO DO GRAFICO.
+#Vamos verificar quemsão os 10 primeiros do ranking
+#Utilizei o groupby do pandas para agrupar 
+#por quantidade de suicidios e por pais
+
+#Agrupando por pais e numero de suicidios
+controle = pd.DataFrame(suicidio['suicides_no'].groupby(suicidio['country']).sum())
+
+# ORDENAR PELO NUMERO DE SUICIDIOS
+controle = controle.sort_values(by="suicides_no", ascending=False)    
+
+# AGORA VAMOS RESETAR O INDICE
+controle = controle.reset_index()
+
+# OS 10 PRIMEIROS PAISES NA PESQUISA PESQUISAS
+top10_by_country = controle.head(10)
+print(top10_by_country)
+
+              country  suicides_no
+0  Russian Federation      1209742
+1       United States      1034013
+2               Japan       806902
+3              France       329127
+4             Ukraine       319950
+5             Germany       291262
+6   Republic of Korea       261730
+7              Brazil       226613
+8              Poland       139098
+9      United Kingdom       136805
+
+# O TÃO ESPERADO GRAFICO VAI SER LANÇADO,VOU USAR UM GRAFICO DE BARRAS. metplotlib,
+# mais o seaborn.
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+# criando a figura
+figura = plt.figure(figsize=(20,10))
+
+<Figure size 1440x720 with 0 Axes>
+
+# TITULO DO GRAFICO
+plt.title("Suicidios praticado entre o ano de 1985 - 2016")
+
+# passando o grafico para a exibição
+
+sns.barplot(y='suicides_no',x='country', data=top10_by_country, palette="Blues_d")
+
+# NOME DE COLUNAS E LINHA
+plt.ylabel('Número de suicídios')
+plt.xlabel('Paises')
+
+#ROTAÇÃO DOS NOMES DOS PAISES, PARA MELHOR VISUALIZAÇÃO
+
+plt.xticks(rotation=45)
+
+# EXIBIR OS GRAFICO
+
+plt.show()
+
+#VERIFICAR A VAROIAÇÃO DO INTERVALO DE ANOS
+
+#AGRUPAR POR ANO E NUMERO DE SUICIDIOS
+intervaloAnos = pd.DataFrame(suicidio['suicides_no'].groupby(suicidio['year']).sum())
+
+#ORDENAR PELO MAIOR NUMERO DE SUICIDIOS
+intervaloAnos = intervaloAnos.reset_index()
+
+# CRIANDO A FIGURA
+
+figure = plt.figure(figsize=(20,10))
+
+# CRIANDO O GRAFICO
+
+sns.set(style="darkgrid")
+sns.lineplot(y='suicides_no', x='year', data=intervaloAnos, palette="ch:.25")
+
+#LABELS
+plt.ylabel('Número de suicidios')
+plt.xlabel("Year")
+plt.title("Número do suicidos por ano de 1985 a 2016")
+
+# ROTAÇÃO DOS NOMES DOS PAISES, PARA MELHOR VISUALISACÃO
+
+plt.xticks(rotation=45)
+
+# EXIBIR O GRAFICO
+plt.show()
+   
+
+# O MEU ULTIMO ESTUDO VAI SER UM GRAFICO  QUE DIZ A VARIAÇÃO DE 30 ANOS
+
+# AGRUPAR POR GERAÇÃO
+variacaoGeral = pd.DataFrame(suicidio['suicides_no'].groupby([suicidio['generation'], suicidio['year']]).sum())
+
+#ORDENAR PELO NUMERO DE SUICIDIOS 
+variacaoGeral = variacaoGeral.reset_index().sort_values(by='suicides_no',ascending=False)
+
+# CRIANDO O GRAFICO 
+
+fig = plt.figure(figsize=(25,10))
+sns.barplot(y='suicides_no', x='year', hue='generation', data=variacaoGeral, palette='deep')
+
+# LABLES
+
+plt.title('distribuição de suicidios por gerações')
+plt.ylabel('Numero de suicidios')
+plt.xlabel('Idade')
+
+# ROTAÇAO EIXO X
+
+plt.xticks(rotation=45)
+
+# MOSTRAR O GRAFICO
+
+plt.tight_layout()
+
+ 
+
+
+ 
+
+ 
+
